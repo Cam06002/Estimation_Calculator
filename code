@@ -1,0 +1,293 @@
+import tkinter as tk
+from tkinter import *
+from tkinter import ttk
+import math
+import Pricing_Data as pd
+
+root = tk.Tk()
+
+root.title("Estimator 1.0")
+root.geometry("1200x600")
+tabControl = ttk.Notebook(root)
+
+tab4 = ttk.Frame(tabControl)
+
+tabControl.add(tab4, text='Bid Calculator')  # calculates all aspects of bid, and gives a total
+
+
+tabControl.pack(expand=1, fill="both")
+
+# calculator tab
+ttk.Label(tab4, text="Bid Calculation").grid(column=1, row=0, padx=10, pady=10)
+
+LARGE_FONT = ("Verdana", 12)
+Y = "y"  # for yes/no questions throughout
+# Lists
+fence_cost = []
+gate_cost = []
+add_cost = []
+job_hours = []
+job_mat = []
+total_cost = []
+post_number = []
+post_cost = []
+tax_total = []
+
+
+def round_up(x):
+    i = int(x)
+    f = x - int(x)
+    if 0.0 < f <= 0.5:
+        f = 0.5
+    elif f > 0.5:
+        f = 1
+    return i + f
+
+
+# Get bid type
+ttk.Label(tab4, text="Enter sl for slide, sw for swing or f for fence: ").grid(column=0, row=1, padx=2, pady=2,
+                                                                               sticky="w")
+enttype = ttk.Entry(tab4)
+enttype.grid(column=0, row=2, pady=2, padx=2, sticky="n")
+
+# Get design
+ttk.Label(tab4, text="Enter f for flat, s for single arch, or d for double arch: ").grid(column=1, row=1, padx=2,
+                                                                                         pady=2, sticky="e")
+entdesign = ttk.Entry(tab4)
+entdesign.grid(column=1, row=2, pady=2, padx=2, sticky="n")
+
+# Get Length Variable
+ttk.Label(tab4, text="Length in inches: ").grid(column=0, row=3, padx=2, pady=2, sticky="s")
+entLength = ttk.Entry(tab4)
+entLength.grid(column=0, row=4, pady=2, padx=2, sticky="n")
+
+# Get Height Variable
+ttk.Label(tab4, text="Height in inches: ").grid(column=1, row=3, padx=2, pady=2, sticky="s")
+entHeight = ttk.Entry(tab4)
+entHeight.grid(column=1, row=4, pady=2, padx=2, sticky="n")
+
+# Get Top Rails Variable
+ttk.Label(tab4, text="Number of top rails: ").grid(column=0, row=5, padx=2, pady=2, sticky="s")
+entTopRails = ttk.Entry(tab4)
+entTopRails.grid(column=0, row=6, pady=2, padx=2, sticky="n")
+
+# Get Bottom Rails Variable
+ttk.Label(tab4, text="Number of bottom rails: ").grid(column=1, row=5, padx=2, pady=2, sticky="s")
+entBottomRails = ttk.Entry(tab4)
+entBottomRails.grid(column=1, row=6, pady=2, padx=2, sticky="n")
+
+# Get Picket Gap Variable
+ttk.Label(tab4, text="Picket gap, in inches: ").grid(column=0, row=7, padx=2, pady=2, sticky="s")
+entPicketGap = ttk.Entry(tab4)
+entPicketGap.grid(column=0, row=8, pady=2, padx=2, sticky="n")
+
+# Points, Circles, Powdercoating
+ttk.Label(tab4, text="Add points? Enter y or n: ").grid(column=1, row=7, padx=2, pady=2, sticky="s")
+entPoints = ttk.Entry(tab4)
+entPoints.grid(column=1, row=8, pady=2, padx=2, sticky="n")
+
+ttk.Label(tab4, text="Add circles? Enter y or n: ").grid(column=0, row=9, padx=2, pady=2, sticky="s")
+entCircles = ttk.Entry(tab4)
+entCircles.grid(column=0, row=10, pady=2, padx=2, sticky="n")
+
+ttk.Label(tab4, text="Add powdercoating? Enter y or n: ").grid(column=1, row=9, padx=2, pady=2, sticky="s")
+entPowder = ttk.Entry(tab4)
+entPowder.grid(column=1, row=10, pady=2, padx=2, sticky="n")
+
+ttk.Label(tab4, text="Site Install? Enter y or n: ").grid(column=0, row=11, padx=2, pady=2, sticky="s")
+entInstall = ttk.Entry(tab4)
+entInstall.grid(column=0, row=12, pady=2, padx=2, sticky="n")
+
+ttk.Label(tab4, text="Number of Posts: ").grid(column=1, row=11, padx=2, pady=2, sticky="s")
+entPosts = ttk.Entry(tab4)
+entPosts.grid(column=1, row=12, pady=2, padx=2, sticky="n")
+
+ttk.Label(tab4, text="Miles to job: ").grid(column=0, row=13, padx=2, pady=2, sticky="s")
+entTravel = ttk.Entry(tab4)
+entTravel.grid(column=0, row=14, pady=2, padx=2, sticky="n")
+
+ttk.Label(tab4, text="Prevailing Wage? Enter y or n: ").grid(column=1, row=13, padx=2, pady=2, sticky="s")
+entPrev = ttk.Entry(tab4)
+entPrev.grid(column=1, row=14, pady=2, padx=2, sticky="n")
+
+def calculate_bid():
+    # variables for shop build
+    two_by_120 = pd.two_by_120
+    two_by_095 = pd.two_by_095
+    four_by_two = pd.four_by_two
+    three_quarter = pd.three_quarter
+    shop_hours = pd.shop_hours
+    stick = pd.stick  # 20 ft material
+    man_hours = pd.man_hours
+
+    # Get input for variables
+    length = int(entLength.get())
+    height = int(entHeight.get())
+    top_rails = int(entTopRails.get())
+    bottom_rails = int(entBottomRails.get())
+    gap = float(entPicketGap.get())
+    design_q = str(entdesign.get())
+    painted_q = str(entPowder.get())
+    point_q = str(entPoints.get())
+    circle_q = str(entCircles.get())
+    build_type = str(enttype.get())
+    install_q = str(entInstall.get())
+    posts = int(entPosts.get())
+    miles = int(entTravel.get())
+    mph = int(pd.per_hour_mileage)
+    fuel = pd.fuel_price
+    gas_milage = pd.miles_per_gallon
+    prev_wage = str(entPrev.get())
+    if prev_wage == "y":
+        man_hours = man_hours * 1.5
+
+    # Calculators based on input and shop build variables
+    trip_labor = (miles / mph) * man_hours
+    trip_cost = (miles / gas_milage) * fuel
+    fence_rails = int(((round_up(length / stick)) * two_by_095) * (top_rails + bottom_rails))
+    hinge_rails = round_up((((length / stick) * two_by_120) * bottom_rails) + ((height / stick) * two_by_120))
+    if design_q == "s":
+        fence_rails = fence_rails + (int(top_rails) * two_by_095)
+    if design_q == "d":
+        fence_rails = fence_rails + ((int(top_rails) * two_by_095) * 2)
+    if length <= 240:
+        hinge_rails = hinge_rails
+    elif length > 240:
+        hinge_rails = round_up((((length / stick) * four_by_two) * bottom_rails) + ((height / stick) * two_by_120))
+    latch_rails = round_up((((length / stick) * two_by_095) * top_rails) + ((height / stick) * two_by_095))
+    rails = int(hinge_rails) + int(latch_rails)
+    if design_q == "s":
+        rails = int(rails) + (int(top_rails) * two_by_095)
+    if design_q == "d":
+        rails = int(rails) + ((int(top_rails) * two_by_095) * 2)
+    pwdr = math.ceil((int(length) / 12) * (int(height) / 12) * 4)
+    if painted_q != Y:
+        pwdr = 0
+    if float(gap) <= 3:
+        pwdr = int(pwdr) * 1.5
+    pickets = math.ceil(length / gap)
+    picket_mat = (math.ceil(pickets / (math.floor(stick / height)))) * three_quarter
+    if point_q == Y:
+        points = int(pickets)
+    else:
+        points = 0
+    if circle_q == Y:
+        circles = int(pickets) + 1
+    else:
+        circles = 0
+
+    # shop labor
+    labor = (length / 12) * (int(shop_hours) * 1.5) + (((circles + points) / 4) * int(shop_hours))
+    if float(gap) <= 3:
+        labor = int(labor) * 1.25
+
+    if build_type == "sl":
+        gate_price = int(rails) + int(pwdr) + int(picket_mat) + int(points) + int(circles) + int(labor)
+        gate_tax = int(gate_price * pd.tax)
+        lbl_result["text"] = "$" + str(gate_price)
+        gate_cost.append(int(gate_price))
+        add_cost.append(int(gate_price))
+        tax_total.append(gate_tax)
+        if install_q == "y":
+            job_hours.append((man_hours * 3) + int(posts) + trip_labor)
+            job_mat.append(pd.footing_mat * int(posts) + trip_cost)
+            post_price = pd.light_post * int(posts)
+            job_mat.append(int(post_price))
+
+    if build_type == "sw":
+        gate_price = int(rails) + int(pwdr) + int(picket_mat) + int(points) + int(circles) + int(labor)
+        gate_tax = int(gate_price * pd.tax)
+        lbl_result["text"] = "$" + str(gate_price)
+        gate_cost.append(int(gate_price))
+        add_cost.append(int(gate_price))
+        tax_total.append(gate_tax)
+        if install_q == "y":
+            job_hours.append((man_hours * 3) + int(posts) + trip_labor)
+            job_mat.append(pd.footing_mat * int(posts) + trip_cost)
+            post_price = pd.heavy_post * int(posts)
+            job_mat.append(int(post_price))
+
+    if build_type == "f":
+        fence_price = int(fence_rails) + int(pwdr) + int(picket_mat) + int(points) + int(circles) + (int(labor) / 2)
+        fence_tax = int(fence_price * pd.tax)
+        lbl_result["text"] = "$" + str(fence_price)
+        fence_cost.append(int(fence_price))
+        add_cost.append(int(fence_price))
+        tax_total.append(fence_tax)
+        post_price = pd.fence_post * int(posts)
+        if install_q == "y":
+            job_hours.append((man_hours * 0.5) + trip_labor)
+            job_mat.append(int(post_price) + trip_cost)
+
+
+def add_leaf():
+    fence_total = sum(fence_cost)
+    lbl_fence["text"] = "$" + str(fence_total)
+    gate_total = sum(gate_cost)
+    lbl_gate["text"] = "$" + str(gate_total)
+    taxes = sum(tax_total)
+    lbl_tax["text"] = "$" + str(taxes)
+    labor_total = sum(job_hours)
+    lbl_Labor["text"] = "$" + str(labor_total)
+    job_mat_total = sum(job_mat)
+    new_total = sum(add_cost)
+    labTotal["text"] = "$" + str(math.ceil(new_total + taxes + labor_total + job_mat_total))
+
+
+buttonbox = tk.Frame(tab4)
+buttonbox.grid(column=1, row=15, padx=5, pady=5)
+
+button1 = tk.Button(buttonbox, text="Calculate", command=lambda: [calculate_bid(), add_leaf()])
+button1.grid(column=0, row=1, padx=10, pady=10, sticky="e")
+
+
+def clear_entries():
+    enttype.delete(0, END)
+    entdesign.delete(0, END)
+    entLength.delete(0, END)
+    entHeight.delete(0, END)
+    entTopRails.delete(0, END)
+    entBottomRails.delete(0, END)
+    entPicketGap.delete(0, END)
+    entPoints.delete(0, END)
+    entCircles.delete(0, END)
+    entPowder.delete(0, END)
+    entInstall.delete(0, END)
+    entPosts.delete(0, END)
+
+
+button3 = tk.Button(buttonbox, text="Add leaf/panel", command=clear_entries)
+button3.grid(column=1, row=1, padx=10, pady=10, sticky="e")
+
+
+lableaf = tk.Label(tab4, text="Panel/Leaf Cost: ")
+lableaf.grid(column=3, row=2, pady=10, padx=2)
+lbl_result = tk.Label(tab4, text=" ")
+lbl_result.grid(column=4, row=2, pady=2, padx=10)
+
+labFence = tk.Label(tab4, text="Fence Total: ")
+labFence.grid(column=3, row=3, pady=2, padx=2)
+lbl_fence = tk.Label(tab4, text=" ")
+lbl_fence.grid(column=4, row=3, pady=2, padx=2)
+
+labGate = tk.Label(tab4, text="Gate Total: ")
+labGate.grid(column=3, row=4, pady=2, padx=2)
+lbl_gate = tk.Label(tab4, text=" ")
+lbl_gate.grid(column=4, row=4, pady=2, padx=2)
+
+lablab = tk.Label(tab4, text="Labor Total: ")
+lablab.grid(column=3, row=5, pady=2, padx=2)
+lbl_Labor = tk.Label(tab4, text=" ")
+lbl_Labor.grid(column=4, row=5, pady=2, padx=2)
+
+labTax = tk.Label(tab4, text="Tax: ")
+labTax.grid(column=3, row=6, pady=2, padx=2)
+lbl_tax = tk.Label(tab4, text=" ")
+lbl_tax.grid(column=4, row=6, pady=2, padx=2)
+
+lbl_total = tk.Label(tab4, text="Total Cost: ")
+lbl_total.grid(column=3, row=7, pady=2, padx=2)
+labTotal = tk.Label(tab4, text=" ")
+labTotal.grid(column=4, row=7, pady=2, padx=2)
+
+root.mainloop()
