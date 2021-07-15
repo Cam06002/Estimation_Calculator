@@ -1,0 +1,26 @@
+# variables for shop build
+# Editable data for pricing page
+
+# variables for shop build
+two_by_120 = 51
+two_by_095 = 48
+four_by_two = 60
+three_quarter = 25
+shop_hours = 50
+stick = 240  # inches for 20' material
+
+# in-field labor
+man_hours = 75
+
+# travel calculation
+fuel_price = 5
+miles_per_gallon = 15
+per_hour_mileage = 50
+
+# post lists and variables
+heavy_post = 50
+light_post = 40
+fence_post = 25
+footing_mat = 50
+
+tax = 0.085
